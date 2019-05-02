@@ -24,7 +24,7 @@ start:
 	mov ds , ax
 	
 	
-	mov ax , 03h 
+	mov ax , 03h  ;切换显示器模式
 	int 10h
 	
 	call init 
@@ -55,7 +55,7 @@ L1:
 	init endp
 ;----------------------------------------
 ;----------------------------------------
-	Clear_Screen proc near
+	Clear_Screen proc near   ;调用int 10h中06功能
 	push ax 
 	push bx 
 	push cx
@@ -81,7 +81,7 @@ L1:
 	mov ah , 09h
 	int 21h
 	
-	mov dl ,color+1
+	mov dl ,color+1  ;dl用于选择颜色
 	mov color_choose , dl
 	
 	mov cx , len
@@ -93,7 +93,7 @@ Pri:
 	call print          ;被输出数字在ax中,颜色在被选中颜色内存中
 	inc dx 
 	add bp , 2
-	cmp dx ,0ah
+	cmp dx ,0ah   ;dx计数，如果到10个换行
 	jnz pri_2
 	inc row
 	mov col , 0
@@ -101,7 +101,7 @@ Pri:
 pri_2:
 	loop Pri
 	
-	mov dh , row
+	mov dh , row   ;移动光标
 	mov dl , byte ptr col
 	mov ah , 02h
 	int 10h
@@ -114,7 +114,7 @@ pri_2:
 	print_number endp
 ;------------------------------------------
 ;------------------------------------------
-	print proc near
+	print proc near  ;先除10压栈，之后int 10h中09号功能调用输出字符，每次输出完自动列数加3
 	push cx
 	push dx
 	push di
@@ -122,7 +122,7 @@ pri_2:
 	push bx
 	mov si , col
 	xor cx , cx
-Push_num:
+Push_num:       
 	xor dx , dx
 	mov di, 10
 	div di
@@ -159,7 +159,7 @@ Out_num:
 	print endp
 ;------------------------------------------
 ;------------------------------------------
-	delay proc near
+	delay proc near  ;延迟空循环空转
 	push cx 
 	push bx
 	mov bx , 100
@@ -181,7 +181,6 @@ dlay:
 	call erase 	;ax中存放想要抹掉的数字
 	mov prime_log , 0
 	
-	mov cx , 100
 	mov bx , 2
 Si_me:
 	cmp prime_log[bx][-1],1
@@ -207,7 +206,7 @@ next_num:
 	inc bx
 	cmp bx , 101
 	je exit
-	loop Si_me
+	jmp Si_me
 
 exit:
 	mov dh , 12
@@ -223,17 +222,12 @@ exit:
 	Sieve_method endp
 ;------------------------------------------
 ;------------------------------------------
-	output_sieve proc near
-	ret
-	output_sieve endp
-;------------------------------------------
-;------------------------------------------
 	erase proc near
 	push dx
 	push di
 	push bx
 	push ax
-	mov bl ,10
+	mov bl ,10  ;通过除10判断余数来判断是否为10的倍数，来确定这个数和他行、列的关系
 	div bl
 	cmp ah , 0
 	jnz n_tens
@@ -268,7 +262,7 @@ print_num:
 	call delay
 	call delay
 	
-	mov dh , row_earse
+	mov dh , row_earse ;通过保存的位置，颜色选择黑色制造消失现象
 	mov dl , byte ptr col_earse
 	
 	mov row , dh
@@ -290,7 +284,7 @@ print_num:
 	erase endp
 ;------------------------------------------
 ;------------------------------------------
-	curr_num proc near
+	curr_num proc near ;在特定位置输出数字
 	push ax
 	push dx
 	push bx
@@ -314,12 +308,6 @@ print_num:
 	lea dx , ave_prime
 	mov ah , 09h
 	int 21h
-	
-;	mov dl , 34
-;	mov dh , 13
-;	mov ah , 02h
-;	mov bh , 0
-;	int 10h
 	
 	mov ax , 0
 	mov cx , len
